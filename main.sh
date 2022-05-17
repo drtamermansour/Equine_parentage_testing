@@ -38,6 +38,14 @@ mv 670K_Equcab3__Mixedbreed_Bellone.vcf 670K_Equcab3_Mixedbreed_Bellone.vcf
 mv 670K_Equcab3__Mixedbreed_Bellone.xlsx 670K_Equcab3_Mixedbreed_Bellone.xlsx
 #5
 mv 670K_Equcab3_Belgian_Haflinger_Bellone_breed_log.xlsx 670K_Equcab3_Belgian_Haflinger_Bellone.xlsx
+#6
+mv 80K_Equcab3_App_Knab_Bellone_Breed_Key.xlsx 80K_Equcab3_App_Knab_Bellone.xlsx
+
+#change xlsx to csv files (keep original copies in backup_original/overwritten_xlsx)
+#670K_Equcab3_Belgian_Haflinger_Bellone.xlsx  
+#670K_Equcab3_Mixedbreed_Bellone.xlsx  
+#80K_Equcab3_App_Knab_Bellone.xlsx
+#New2M_UMN.xlsx
 
 ## 2. Other public data
 # Our Array data
@@ -783,3 +791,29 @@ rm *.{hh,log,nosex}
 
 ##CHECK for the No of chromosomes per bim file
 for f in *.bim;do echo $f; cat $f  | grep -v "^#" | awk '{print $1}' | sort | uniq -c | sort -k2,2n;done > checkBimChrNo.txt
+
+############################
+### Update sample IDs to reflect the study and breed
+cd $work_dir
+cp backup_original/{670K_Equcab3_Mixedbreed_Bellone.csv,\
+670K_Equcab3_Belgian_Haflinger_Bellone.csv,\
+80K_Equcab3_App_Knab_Bellone.csv,\
+New2M_UMN.csv,\
+80K_Equcab3_MultipleBreeds_vit.csv} .
+
+## fix the end of line characters
+for f in 670K_Equcab3_Mixedbreed_Bellone.csv \
+670K_Equcab3_Belgian_Haflinger_Bellone.csv \
+80K_Equcab3_App_Knab_Bellone.csv \
+New2M_UMN.csv \
+80K_Equcab3_MultipleBreeds_vit.csv;do
+ sed -i -e "s/\r//g" $f;
+done
+
+## remove header and reorder the columns 
+cp New2M_UMN.csv New2M_UMN.csv_temp
+tail -n+2 New2M_UMN.csv_temp | awk 'BEGIN{FS=OFS=","}{print $2,$1}' > New2M_UMN.csv
+
+cp 80K_Equcab3_MultipleBreeds_vit.csv 80K_Equcab3_MultipleBreeds_vit.csv_temp
+tail -n+2 80K_Equcab3_MultipleBreeds_vit.csv_temp | awk 'BEGIN{FS=OFS=","}{print $2,$1,$3}' > 80K_Equcab3_MultipleBreeds_vit.csv
+
