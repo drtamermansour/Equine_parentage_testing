@@ -33,6 +33,7 @@ rm ${out}_ref.vcf_temp
 grep -v "^#" ${out}_ref.vcf | awk 'BEGIN{FS=OFS="\t"}{print $4}' | tr 'tcga' 'TCGA' > ${out}.ref_alleles
 tail -n+2 "$manifest" | awk 'BEGIN{FS=OFS="\t"}{if($3!="Y")print $7,$8}' > ${out}.chip_alleles
 cat ${out}.chip_alleles | tr 'TCGA' 'AGCT' > ${out}.chip_alleles_oppStrand
+paste "${out}.ref_alleles" "${out}.chip_alleles" "${out}.chip_alleles_oppStrand" | awk 'BEGIN{FS=OFS="\t";a=b=c=d=e=0}{if($1==$2)a+=1;else if($1==$3)b+=1;else if($1==$4)c+=1;else if($1==$5)d+=1;else e+=1;}END{print a,b,c,d,e;}'
 paste "${out}.ref_alleles" "${out}.chip_alleles" "${out}.chip_alleles_oppStrand" | awk 'BEGIN{FS=OFS="\t"}{if($1==$2)print $2,$3;else if($1==$3)print $3,$2;else if($1==$4)print $4,$5;else if($1==$5)print $5,$4;else print $1,"."}' > ${out}.refalt_alleles
 rm ${out}.ref_alleles ${out}.chip_alleles ${out}.chip_alleles_oppStrand
 

@@ -1,0 +1,34 @@
+## My ultimate aim is to know EC2.pos_REF/ALT & EC3.pos_REF/ALT for all variants in the array manifest
+## Molly remap file has EC2.pos_REF & EC3.pos_REF/ALT. I can easily find EC2.ALT from input A/B alleles but this file is missing the SNPs that could not align to EC3
+## My manifest_to_ref.sh find the EC2.pos_REF/ALT but not for Un2 or Y chromosomes
+
+input (array manifest)                 -> Axiom_MNEc670_Annotation.r2.csv
+Simplified input                       -> Axiom_MNEc670_Annotation.r2.simple.csv
+exclude Un2 chromosome                 -> Axiom_MNEc670_Annotation.r2.simple_excludeUN2.csv
+
+VCF with input pos                     -> Axiom_MNEc670_r2_pos.vcf
+add ref allele by bcftools             -> Axiom_MNEc670_r2_ref.vcf
+add alt using A/B alleles (&exclude Y) -> Axiom_MNEc670_r2.vcf
+ALT/REF alleles on both strands        -> Axiom_MNEc670_r2.alt_ref_comp.tab  (arr670k // has EC2.pos_REF/ALT)
+
+more Simplified input with cA/B (has Un2)                -> ann_670.tab
+Molly remap file (has EC2.pos_REF & EC3.pos_REF/ALT)     -> MNEc670k.unique_remap.FINAL.csv
+Molly remap file with better format                      -> MNEc670k_remap.tab
+ann_670.tab (8 columns) + MNEc670k_remap.tab (6 columns) -> map_670.tab     # MNEc670k_remap.tab columns=0 for Molly's unmapped SNPs
+map_670.tab (14 columns) + $arr670k (5 columns)          -> map_670_ext.tab # $arr670k columns=0 for Un2 & Y
+indentify EC2.ALT from map_670_ext.tab (see algorithm)   -> map_670_complete.tab (map670)
+                                                            (3)ID (4)EC2.pos_REF/ALT (4)EC3.pos_REF/ALT
+map670 (11 columns) + Equcab3_array.manifest (4 columns) -> map_670_complete2.tab
+                                                            add EC3.pos_REF/ALT from the new array manifest
+
+
+                                                            
+## EC2.ALT algorithm
+_____________________
+$10=EC2.REF (from Molly remap)
+$17=EC2.REF (From my VCF)
+if($10==$17) ==> get EC2.REF/ALT from my VCF (it should be the same if I calc from Molly+Ann)
+if($9=="0" && $15!="0") i.e. Unmapped in Molly but found in my VCF ==> get EC2.REF/ALT from my VCF
+if($9!="0" && $15=="0") i.e. found in Molly but not in VCF so I will calc from Molly+Ann (Exactly like what I did in manifest_to_ref.sh
+
+
