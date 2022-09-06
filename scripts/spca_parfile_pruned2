@@ -1,0 +1,12 @@
+genotypename:    allStudies.nonAmb.dedup.cand1.pruned2.forEigensoft.ped
+snpname:         allStudies.nonAmb.dedup.cand1.pruned2.forEigensoft.map
+indivname:       allStudies.nonAmb.dedup.cand1.pruned2.forEigensoft.ped
+evecoutname:     out2.evec
+evaloutname:     out2.eval
+altnormstyle:    NO 
+numoutevec:      8
+numoutlieriter:  0
+familynames:     NO
+grmoutname:      grm
+fastmode:        YES
+
