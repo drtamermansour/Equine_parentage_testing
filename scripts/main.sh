@@ -1499,7 +1499,7 @@ rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/allInfo.frq.merged
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/allInfo.frq.merged5v2.cand.chr.dist remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/media-1-TM_extv2.txt remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/sel_1500.listv2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/sel_1300.listv2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/sel_1300.listv2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 #rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/newIds/sel_1300.listv2.chr.dist remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 
 
@@ -1651,7 +1651,7 @@ cat <(echo "chr snpID mapPos coordinate" | tr ' ' '\t') <(head -n1 Y_SNP-List_pa
 awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$2]=$0;next}{if(a[$2])print a[$2],$0}' <(grep ^EMSY GGPIlluminaEquineV4_Ecab2_Warmblood_KWPN.map | sed -e "s/\r//g") Y_SNP-List_paternityCHIP_with_KASP_Ill70K_quality_simplified.txt >> Y_SNP-List.txt
 head -n1  Y_SNP-List.txt >  Y_SNP-List_sel.txt
 cat Y_SNP-List.txt | awk 'BEGIN{FS=OFS="\t"}{if($17=="ok" && $18=="Yes_OK")print}' >>  Y_SNP-List_sel.txt
-rclone -v --copy-links copy Y_SNP-List_sel.txt remote_UCDavis_GoogleDr:Horse_parentage_share
+rclone -v --copy-links copy Y_SNP-List_sel.txt remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 ## summary: the map file has 170 variant & the original Y_SNP-List has 40 good variant
 ## merging the 2 files, we have 155, with only 39 from the good variants in the  Y_SNP-List
@@ -1701,7 +1701,7 @@ rclone -v --copy-links copy PAR60maf2_sel.txt remote_UCDavis_GoogleDr:Horse_pare
 
 head -n1 ../newIds/allInfo.frq.merged5v2.cand > PAR60maf2_selv2.txt
 cat allStudies.nonAmb.dedup.par60maf2.bim | cut -f2 | grep -Fwf - ../newIds/allInfo.frq.merged5v2 >> PAR60maf2_selv2.txt
-rclone -v --copy-links copy PAR60maf2_selv2.txt remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy PAR60maf2_selv2.txt remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 
 ## B) X specific
@@ -1818,7 +1818,7 @@ tail -n+2 xSp.allInfo.frq.merged5v2 | awk -F"\t" '{if($23<=150)print}' | sort -k
 ## Task: upload cand1.frq.merged5
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/x_chr/xSp.allInfo.frq.merged5v2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/x_chr/xSp.allInfo.frq.merged5v2.cand remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/x_chr/xSp.sel_150.listv2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/x_chr/xSp.sel_150.listv2 remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 ########################################
 ## Make one final list (using aggressively pruned data)
 mkdir "$work_dir"/final && cd "$work_dir"/final
@@ -1914,15 +1914,15 @@ bcftools sort -o Equ_Parentv2cor_sorted.vcf Equ_Parentv2cor.vcf
 bcftools norm -c ws -f $equCab3_ref Equ_Parentv2cor_sorted.vcf 1> Equ_Parentv2cor.check.vcf 2> Equ_Parentv2cor.bcftools.log
 
 
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/Equ_Parentv2cor.check.vcf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/Equ_Parentv2cor.check.vcf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 #########
 ## check for distribution (using final list from aggressively pruned data)
 grep -v "^#" Equ_Parentv2cor.check.vcf | awk -F"\t" '{print $1}' | sort | uniq -c | sort -k2,2n > Equ_Parentv2cor.check.chr.dist
 
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/Equ_Parentv2cor.check.chr.dist remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/Equ_Parentv2cor.check.chr.dist remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
-Rscript rainfall.R ## I ran locally 
+Rscript rainfall.R ## I ran locally  ## Outputs: Rainfall_density.pdf & Rainfall-PAR.pdf
 
 # special distribution check for PAR amrkers
 bgzip -c Equ_Parentv2cor.check.vcf > Equ_Parentv2cor.check.vcf.gz
@@ -1933,6 +1933,7 @@ grep -v "^#" Equ_Parentv2cor.check_PAR.vcf >> PAR.bed
 echo "X 2071050 PAR-end" | tr ' ' '\t' >> PAR.bed
 echo "CHR,POS,ID,Dist" > PAR_dist.csv
 cat PAR.bed | awk '{if(!x){x=$2;print $1,$2,$3,0;}else{print $1,$2,$3,$2-x;x=$2}}' | tr ' ' ',' >> PAR_dist.csv
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PAR_dist.csv remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 
 #######
@@ -1964,15 +1965,15 @@ cat allStudies.nonAmb.dedup.sel.forEigensoft.ped | \
 cat st_sample_sel.map | awk '{print $1,$3,$4}' | sort | uniq > st_sel.dat ## indifferent from st.dat
 
 Rscript plot_sel.R "PC1" "PC2"
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC2.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC2.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 Rscript plot_sel.R "PC1" "PC3"
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 Rscript plot_sel.R "PC1" "PC4"
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC4.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC4.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 Rscript plot_sel.R "PC1" "PC5"
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC5.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC5.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 Rscript plot_sel.R "PC2" "PC3"
-rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC2.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC2.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 ###############
 ## prep GBS forms
 echo "Marker ID,Chromosome,Start (Begin Location),End Location,Reference Allele,Variant Allele,Strand,Marker Type,Priority,Sequence" > GBS.csv
@@ -1984,9 +1985,9 @@ cp GBS.csv GBS_Y.csv
 awk 'BEGIN{FS="\t";OFS=","}FNR==NR{a[$7]=$20",SNP,1,"$15;next}{if(a[$3])print $3,$1,$2,$2,$4,$5,a[$3]}' ../y_chr/Y_SNP-List_sel_cor.txt <(grep "^eMSYv3" Equ_Parentv2cor.check.vcf) | sed 's/,norm,/,Plus,/' | sed 's/,reco,/,Minus,/' >> GBS_Y.csv
 
 
-> Y_flank_errors
-> GBS_Y_QC.csv
-> GBS_Y_form.csv
+echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > Y_flank_errors.tab
+echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > GBS_Y_QC.tab
+echo "ID Sequence" | tr ' ' '\t' > GBS_Y_seq.tab
 seq=$(head -n2 $HOME/Horse_parentage_SNPs/eMSY/eMSYv3_nontrimmed.fasta | tail -n1 | tr 'acgt' 'ACGT')
 #seqRC=$(echo $seq | rev | tr 'ACGT' 'TGCA')
 tail -n+2 GBS_Y.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
@@ -2009,10 +2010,14 @@ tail -n+2 GBS_Y.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/'
     fpref=$(echo ${seq:$pos:100} | rev | tr 'ACGT' 'TGCA')
     fsuff=$(echo ${seq:$start:100} | rev | tr 'ACGT' 'TGCA')
   fi
-  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff >> Y_flank_errors;fi
-  echo $id $ref $tref $pref $tpref $suff $tsuff >> GBS_Y_QC.csv
-  echo $id $fpref$alleles$fsuff >> GBS_Y_form.csv
+  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> Y_flank_errors.tab;fi
+  echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> GBS_Y_QC.tab
+  echo $id $fpref$alleles$fsuff | tr ' ' '\t' >> GBS_Y_seq.tab
 done
+
+paste GBS_Y.csv GBS_Y_seq.tab | tr '\t' ',' | cut -d, -f-9,12 > GBS_Y_form.csv
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/GBS_Y_form.csv remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/Y_flank_errors.tab remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 
 # Equcab3
@@ -2023,6 +2028,11 @@ awk 'BEGIN{FS="\t";OFS=","}FNR==NR{a[$1]=$5",SNP,1,"$6;next}{if(a[$3])print $3,$
 tchr=""
 > nonY_flank_errors
 > GBS_nonY_QC.csv
+> GBS_nonY_form.csv
+
+echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > nonY_flank_errors.tab
+echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > GBS_nonY_QC.tab
+echo "ID Sequence" | tr ' ' '\t' > GBS_nonY_seq.tab
 tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
   #echo $chr;
   if [ "$chr" != "$tchr" ];then
@@ -2034,14 +2044,17 @@ tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\]
   tpref=$(echo ${seq:$start:$prefLen} | tr 'acgt' 'ACGT')
   tsuff=$(echo ${seq:$pos:$suffLen} | tr 'acgt' 'ACGT')
   tref=$(echo ${seq:$tpos:1} | tr 'acgt' 'ACGT')
-  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff >> nonY_flank_errors;fi
-  echo $id $ref $tref $pref $tpref $suff $tsuff >> GBS_nonY_QC.csv
+  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> nonY_flank_errors.tab;fi
+  echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> GBS_nonY_QC.tab
   fstart=$((tpos-100))
   fpref=$(echo ${seq:$start:100} | tr 'acgt' 'ACGT')
   fsuff=$(echo ${seq:$pos:100} | tr 'acgt' 'ACGT')
-  echo $id $fpref$alleles$fsuff >> GBS_nonY_form.csv
-done
+  echo $id $fpref$alleles$fsuff | tr ' ' '\t' >> GBS_nonY_seq.tab
+  done
 
+paste GBS_nonY.csv GBS_nonY_seq.tab | tr '\t' ',' | cut -d, -f-9,12 > GBS_nonY_form.csv
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/GBS_nonY_form.csv remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/nonY_flank_errors.tab remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
 #######
 ## start a new screen
@@ -2052,3 +2065,12 @@ equCab3_vcfContigs="$work_dir"/equCab3/vcf_contigs.txt
 map670="$work_dir/SNParrays/670k/map_670_complete.tab"
 equCab3_ref="$work_dir"/equCab3/equCab3_genome.fa
 
+####
+## assessment of 80k markers
+comm -23 <(grep -v "^#" Equ_Parentv2cor.check.vcf | grep -v eMSYv3 | cut -f3 | sort) <(cat ../GGPIlluminaEquineV4_Ecab2_Warmblood_KWPN.bim | cut -f2 | sort) > 80k_missing
+#AX-103508102
+#AX-104419981
+cat 80k_missing | grep -Fwf - "$work_dir"/newIds/sel_1300.listv2
+cat 80k_missing | grep -Fwf - "$work_dir"/x_chr/PAR60maf2_selv2.txt ## 2
+cat 80k_missing | grep -Fwf - "$work_dir"/x_chr/xSp.sel_150.listv2
+## This chip has all the Y markers but it misses 2 of PAR markers
