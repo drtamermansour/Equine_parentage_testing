@@ -308,6 +308,9 @@ $10,$5}' | sed 's/^chr//' > equCab3_chrMap
 equCab3_chrMap="$work_dir/equCab3/equCab3_chrMap"
 
 
+cat $equCab3_ref | awk '/^>/{print s? s"\n"$0:$0;s="";next}{s=s sprintf("%s",$0)}END{if(s)print s}' > "$work_dir"/equCab3/equCab3_genome_unwrap.fa
+equCab3_ref_unwrap="$work_dir"/equCab3/equCab3_genome_unwrap.fa
+
 ##### array data
 ## 70k
 mkdir -p $work_dir/SNParrays/70k && cd $work_dir/SNParrays/70k
@@ -1841,13 +1844,13 @@ paste dif1 dif2 | awk 'BEGIN{FS=OFS="\t"}{if($22=="norm")print $17;else print $2
 grep $marker ../eMSY/eMSYv3_nontrimmed.fasta | sed "s/$marker/\n/" | head -n1 | tr -d '\n' | wc -c;done > dif3
 paste dif1 dif3 | cut -f7,15-17,21,22,23
 #fYR, fTI, fWM (strand swap)
-#fWQ maps to eMSYv3:5042449 instead of eMSYv3:5042499
+#fWQ also suffers from strand swap. Moreover, it should map to eMSYv3:5042449 instead of eMSYv3:5042499
 marker=$(echo "AAGTGATGACATTGTGTTTTGCTCTAATTCCAACAGCCTTAGATACACTT" | tr 'TCGA' 'AGCT' | rev)
 grep $marker ../eMSY/eMSYv3_nontrimmed.fasta | sed "s/$marker/\n/" | head -n1 | tr -d '\n' | wc -c
-#rAL also suffers from strand swap but it also should be labeled "reco" instead of "norm"
+#rAL also suffers from strand swap. Moreover, it should be labeled "reco" instead of "norm"
 
 
-## correct the position of fWQ and orintation of rAL (bcftools will swap the alleles with the remaining 3 SNPs)
+## correct the position of fWQ and orintation of rAL (bcftools will swap the alleles of the 5 SNPs)
 cat "$work_dir"/y_chr/Y_SNP-List_sel.txt | awk 'BEGIN{FS=OFS="\t"}{if($7=="fWQ"){$4="5042449";$19="eMSYv3:5042449"};if($7=="rAL")$20="reco";print;}' > "$work_dir"/y_chr/Y_SNP-List_sel_cor.txt
 echo "##fileformat=VCFv4.3" > Equ_Parentv2cor.vcf
 cat $equCab3_vcfContigs >> Equ_Parentv2cor.vcf
@@ -1893,13 +1896,13 @@ paste dif1 dif2 | awk 'BEGIN{FS=OFS="\t"}{if($22=="norm")print $17;else print $2
 grep $marker ../eMSY/eMSYv3_nontrimmed.fasta | sed "s/$marker/\n/" | head -n1 | tr -d '\n' | wc -c;done > dif3
 paste dif1 dif3 | cut -f7,15-17,21,22,23
 #fYR, fTI, fWM (strand swap)
-#fWQ maps to eMSYv3:5042449 instead of eMSYv3:5042499
+#fWQ also suffers from strand swap. Moreover, it should map to eMSYv3:5042449 instead of eMSYv3:5042499
 marker=$(echo "AAGTGATGACATTGTGTTTTGCTCTAATTCCAACAGCCTTAGATACACTT" | tr 'TCGA' 'AGCT' | rev)
 grep $marker ../eMSY/eMSYv3_nontrimmed.fasta | sed "s/$marker/\n/" | head -n1 | tr -d '\n' | wc -c
-#rAL also suffers from strand swap but it also should be labeled "reco" instead of "norm"
+#rAL also suffers from strand swap. Moreover, it should be labeled "reco" instead of "norm"
 
 
-## correct the position of fWQ and orintation of rAL (bcftools will swap the alleles with the remaining 3 SNPs)
+## correct the position of fWQ and orintation of rAL (bcftools will swap the alleles of the 5 SNPs)
 cat "$work_dir"/y_chr/Y_SNP-List_sel.txt | awk 'BEGIN{FS=OFS="\t"}{if($7=="fWQ"){$4="5042449";$19="eMSYv3:5042449"};if($7=="rAL")$20="reco";print;}' > "$work_dir"/y_chr/Y_SNP-List_sel_cor.txt
 echo "##fileformat=VCFv4.3" > Equ_Parentv2cor.vcf
 cat $equCab3_vcfContigs >> Equ_Parentv2cor.vcf
@@ -1964,12 +1967,81 @@ Rscript plot_sel.R "PC1" "PC2"
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC2.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 Rscript plot_sel.R "PC1" "PC3"
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
-#Rscript plot_sel.R "PC1" "PC4"
-#rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC4.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
-#Rscript plot_sel.R "PC1" "PC5"
-#rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC5.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+Rscript plot_sel.R "PC1" "PC4"
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC4.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+Rscript plot_sel.R "PC1" "PC5"
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC1.PC5.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
 Rscript plot_sel.R "PC2" "PC3"
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PC2.PC3.out_sel.evec.pdf remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning
+###############
+## prep GBS forms
+echo "Marker ID,Chromosome,Start (Begin Location),End Location,Reference Allele,Variant Allele,Strand,Marker Type,Priority,Sequence" > GBS.csv
+
+# Y: eMSYv3.0
+#cp GBS.csv GBS_Y.csv
+#tail -n+2 ../y_chr/Y_SNP-List_sel_cor.txt | awk 'BEGIN{FS="\t";OFS=","}{print $7,"eMSYv3",$4,$4,$8,$9,$20,"SNP","1",$15}' | sed 's/,norm,/,Plus,/' | sed 's/,reco,/,Minus,/' >> GBS_Y.csv
+cp GBS.csv GBS_Y.csv
+awk 'BEGIN{FS="\t";OFS=","}FNR==NR{a[$7]=$20",SNP,1,"$15;next}{if(a[$3])print $3,$1,$2,$2,$4,$5,a[$3]}' ../y_chr/Y_SNP-List_sel_cor.txt <(grep "^eMSYv3" Equ_Parentv2cor.check.vcf) | sed 's/,norm,/,Plus,/' | sed 's/,reco,/,Minus,/' >> GBS_Y.csv
+
+
+> Y_flank_errors
+> GBS_Y_QC.csv
+> GBS_Y_form.csv
+seq=$(head -n2 $HOME/Horse_parentage_SNPs/eMSY/eMSYv3_nontrimmed.fasta | tail -n1 | tr 'acgt' 'ACGT')
+#seqRC=$(echo $seq | rev | tr 'ACGT' 'TGCA')
+tail -n+2 GBS_Y.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
+  tpos=$((pos-1))
+  prefLen=${#pref}
+  suffLen=${#suff}
+  start=$((tpos-prefLen))
+  fstart=$((tpos-100))
+  tref=${seq:$tpos:1}
+  if [ "$strand" == "Plus" ];then
+    tpref=${seq:$start:$prefLen}
+    tsuff=${seq:$pos:$suffLen}
+    #tref=${seq:$tpos:1}
+    fpref=${seq:$start:100}
+    fsuff=${seq:$pos:100}
+  else
+    tpref=$(echo ${seq:$pos:$((suffLen-1))} | rev | tr 'ACGT' 'TGCA')
+    tsuff=$(echo ${seq:$((start-1)):$((prefLen+1))} | rev | tr 'ACGT' 'TGCA')
+    #tref=$(echo ${seq:$tpos:1} | tr 'ACGT' 'TGCA')
+    fpref=$(echo ${seq:$pos:100} | rev | tr 'ACGT' 'TGCA')
+    fsuff=$(echo ${seq:$start:100} | rev | tr 'ACGT' 'TGCA')
+  fi
+  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff >> Y_flank_errors;fi
+  echo $id $ref $tref $pref $tpref $suff $tsuff >> GBS_Y_QC.csv
+  echo $id $fpref$alleles$fsuff >> GBS_Y_form.csv
+done
+
+
+# Equcab3
+cp GBS.csv GBS_nonY.csv
+awk 'BEGIN{FS="\t";OFS=","}FNR==NR{a[$1]=$5",SNP,1,"$6;next}{if(a[$3])print $3,$1,$2,$2,$4,$5,a[$3]}' ../SNParrays/670k/Axiom_MNEc670.na35.r3.a2.annot.simple.csv <(grep -v "^#" Equ_Parentv2cor.check.vcf) | sed 's/,+,/,Plus,/' | sed 's/,-,/,Minus,/' >> GBS_nonY.csv
+
+## Flank errors of illumina probes and find the 200bp flanking sequence for the GBS form
+tchr=""
+> nonY_flank_errors
+> GBS_nonY_QC.csv
+tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
+  #echo $chr;
+  if [ "$chr" != "$tchr" ];then
+    tchr=$chr;seq=$(grep -A1 "^>$chr$" $equCab3_ref_unwrap | tail -n1);fi
+  tpos=$((pos-1))
+  prefLen=${#pref}
+  suffLen=${#suff}
+  start=$((tpos-prefLen))
+  tpref=$(echo ${seq:$start:$prefLen} | tr 'acgt' 'ACGT')
+  tsuff=$(echo ${seq:$pos:$suffLen} | tr 'acgt' 'ACGT')
+  tref=$(echo ${seq:$tpos:1} | tr 'acgt' 'ACGT')
+  if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff >> nonY_flank_errors;fi
+  echo $id $ref $tref $pref $tpref $suff $tsuff >> GBS_nonY_QC.csv
+  fstart=$((tpos-100))
+  fpref=$(echo ${seq:$start:100} | tr 'acgt' 'ACGT')
+  fsuff=$(echo ${seq:$pos:100} | tr 'acgt' 'ACGT')
+  echo $id $fpref$alleles$fsuff >> GBS_nonY_form.csv
+done
+
 
 #######
 ## start a new screen
