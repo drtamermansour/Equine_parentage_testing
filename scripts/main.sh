@@ -1874,19 +1874,24 @@ Rscript rainfall.R
 ##########
 ## Make one final list (using aggressively pruned data) but include the more relaxed X SNPs
 mkdir "$work_dir"/final2 && cd "$work_dir"/final2
-#echo "SNP_ID SNP_name Chr Pos Strand Flank REF ALT" | tr ' ' '\t' > Equ_Parentv2.manifest
-#awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$1]=$1FS$2FS$8FS$9FS"."FS"."FS$10FS$11;next}{if(a[$2])print a[$2];}' $map670 <(cat "$work_dir"/newIds/sel_1300.listv2 "$work_dir"/x_chr/PAR_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2) >> Equ_Parentv2.manifest
 
+# define how many autosomal markers to keep
+sex_markers=$(($(wc -l "$work_dir"/x_chr/PAR60maf2_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2 "$work_dir"/y_chr/Y_SNP-List_sel.txt | tail -n1 | awk '{print $1}')-3))
+keep=$((1500-sex_markers))
+head -n1 "$work_dir"/newIds/allInfo.frq.merged5v2 > sel_auto.listv2
+tail -n+2 "$work_dir"/newIds/allInfo.frq.merged5v2 | awk -v keep=$keep -F"\t" '{if($23<=keep)print}' | sort -k23,23n >> sel_auto.listv2 ## make sure this file does not have any X markers
+
+# make the combined VCF
 echo "##fileformat=VCFv4.3" > Equ_Parentv2.vcf
 cat $equCab3_vcfContigs >> Equ_Parentv2.vcf
 echo "#CHROM POS ID REF ALT QUAL FILTER INFO" | tr ' ' '\t' >> Equ_Parentv2.vcf
-awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$1]=$8FS$9FS$1FS$10FS$11FS"."FS"."FS".";next}{if(a[$2])print a[$2];}' $map670 <(cat "$work_dir"/newIds/sel_1300.listv2 "$work_dir"/x_chr/PAR60maf2_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2) >> Equ_Parentv2.vcf
+awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$1]=$8FS$9FS$1FS$10FS$11FS"."FS"."FS".";next}{if(a[$2])print a[$2];}' $map670 <(cat sel_auto.listv2 "$work_dir"/x_chr/PAR60maf2_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2) >> Equ_Parentv2.vcf
 tail -n+2 "$work_dir"/y_chr/Y_SNP-List_sel.txt | awk 'BEGIN{FS=OFS="\t"}{print $8,$9}' | tr 'TCGA' 'AGCT' > temp_oppStrand
 paste <(tail -n+2 "$work_dir"/y_chr/Y_SNP-List_sel.txt) temp_oppStrand | awk 'BEGIN{FS=OFS="\t"}{if($20=="norm")print "eMSYv3",$4,$7,$8,$9,".",".",".";else print "eMSYv3",$4,$7,$21,$22,".",".",".";}' >> Equ_Parentv2.vcf
 bcftools sort -o Equ_Parentv2_sorted.vcf Equ_Parentv2.vcf
-bcftools norm -c ws -f $equCab3_ref Equ_Parentv2_sorted.vcf 1> Equ_Parentv2.check.vcf 2> Equ_Parentv2.bcftools.log
+bcftools norm -c ws -f $equCab3_ref Equ_Parentv2_sorted.vcf 1> Equ_Parentv2.check.vcf 2> Equ_Parentv2.bcftools.log ## There are 5 problematic Markers
 
-
+# Identify the problematic Markers
 grep -v "^#" Equ_Parentv2.check.vcf > temp_check
 grep -v "^#" Equ_Parentv2_sorted.vcf > temp_orig
 diff temp_check temp_orig
@@ -1907,7 +1912,7 @@ cat "$work_dir"/y_chr/Y_SNP-List_sel.txt | awk 'BEGIN{FS=OFS="\t"}{if($7=="fWQ")
 echo "##fileformat=VCFv4.3" > Equ_Parentv2cor.vcf
 cat $equCab3_vcfContigs >> Equ_Parentv2cor.vcf
 echo "#CHROM POS ID REF ALT QUAL FILTER INFO" | tr ' ' '\t' >> Equ_Parentv2cor.vcf
-awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$1]=$8FS$9FS$1FS$10FS$11FS"."FS"."FS".";next}{if(a[$2])print a[$2];}' $map670 <(cat "$work_dir"/newIds/sel_1300.listv2 "$work_dir"/x_chr/PAR60maf2_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2) >> Equ_Parentv2cor.vcf
+awk 'BEGIN{FS=OFS="\t"}FNR==NR{a[$1]=$8FS$9FS$1FS$10FS$11FS"."FS"."FS".";next}{if(a[$2])print a[$2];}' $map670 <(cat sel_auto.listv2 "$work_dir"/x_chr/PAR60maf2_selv2.txt "$work_dir"/x_chr/xSp.sel_150.listv2) >> Equ_Parentv2cor.vcf
 tail -n+2 "$work_dir"/y_chr/Y_SNP-List_sel_cor.txt | awk 'BEGIN{FS=OFS="\t"}{print $8,$9}' | tr 'TCGA' 'AGCT' > temp_oppStrand_cor
 paste <(tail -n+2 "$work_dir"/y_chr/Y_SNP-List_sel_cor.txt) temp_oppStrand_cor | awk 'BEGIN{FS=OFS="\t"}{if($20=="norm")print "eMSYv3",$4,$7,$8,$9,".",".",".";else print "eMSYv3",$4,$7,$21,$22,".",".",".";}' >> Equ_Parentv2cor.vcf
 bcftools sort -o Equ_Parentv2cor_sorted.vcf Equ_Parentv2cor.vcf
@@ -1941,7 +1946,7 @@ rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/PAR_dist.csv remot
 ## prep data set by extracting selected SNPs
 cat Equ_Parentv2cor.check.vcf | grep -v "^#" | cut -f3 > sel_Ids
 plink --bfile ../newIds/allStudies.nonAmb.dedup --chr-set 31 no-xy --allow-extra-chr --extract sel_Ids --make-bed --out allStudies.nonAmb.dedup.sel
-## 1470 variants and 8465 samples pass filters and QC.
+## 1461 variants and 8465 samples pass filters and QC.
 
 ## remove extra-chr & make indvidual id unique
 plink --bfile allStudies.nonAmb.dedup.sel --chr-set 31 no-xy --allow-extra-chr 0 --allow-no-sex --recode --out allStudies.nonAmb.dedup.sel.forEigensoft
@@ -2026,15 +2031,10 @@ awk 'BEGIN{FS="\t";OFS=","}FNR==NR{a[$1]=$5",SNP,1,"$6;next}{if(a[$3])print $3,$
 
 ## Flank errors of illumina probes and find the 200bp flanking sequence for the GBS form
 tchr=""
-> nonY_flank_errors
-> GBS_nonY_QC.csv
-> GBS_nonY_form.csv
-
 echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > nonY_flank_errors.tab
 echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > GBS_nonY_QC.tab
 echo "ID Sequence" | tr ' ' '\t' > GBS_nonY_seq.tab
 tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
-  #echo $chr;
   if [ "$chr" != "$tchr" ];then
     tchr=$chr;seq=$(grep -A1 "^>$chr$" $equCab3_ref_unwrap | tail -n1);fi
   tpos=$((pos-1))
@@ -2050,12 +2050,16 @@ tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\]
   fpref=$(echo ${seq:$start:100} | tr 'acgt' 'ACGT')
   fsuff=$(echo ${seq:$pos:100} | tr 'acgt' 'ACGT')
   echo $id $fpref$alleles$fsuff | tr ' ' '\t' >> GBS_nonY_seq.tab
-  done
+done
 
 paste GBS_nonY.csv GBS_nonY_seq.tab | tr '\t' ',' | cut -d, -f-9,12 > GBS_nonY_form.csv
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/GBS_nonY_form.csv remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/nonY_flank_errors.tab remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 
+
+cat GBS_Y_form.csv > GBS_form.csv
+tail -n+2 GBS_nonY_form.csv >> GBS_form.csv
+rclone -v --copy-links copy $HOME/Horse_parentage_SNPs/final2/GBS_form.csv remote_UCDavis_GoogleDr:Horse_parentage_share/agressive_pruning/selected
 #######
 ## start a new screen
 cd ~/Horse_parentage_SNPs
@@ -2070,7 +2074,7 @@ equCab3_ref="$work_dir"/equCab3/equCab3_genome.fa
 comm -23 <(grep -v "^#" Equ_Parentv2cor.check.vcf | grep -v eMSYv3 | cut -f3 | sort) <(cat ../GGPIlluminaEquineV4_Ecab2_Warmblood_KWPN.bim | cut -f2 | sort) > 80k_missing
 #AX-103508102
 #AX-104419981
-cat 80k_missing | grep -Fwf - "$work_dir"/newIds/sel_1300.listv2
+cat 80k_missing | grep -Fwf - sel_auto.listv2
 cat 80k_missing | grep -Fwf - "$work_dir"/x_chr/PAR60maf2_selv2.txt ## 2
 cat 80k_missing | grep -Fwf - "$work_dir"/x_chr/xSp.sel_150.listv2
 ## This chip has all the Y markers but it misses 2 of PAR markers
