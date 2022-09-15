@@ -1994,7 +1994,6 @@ echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t'
 echo "ID in_ref gen_ref in_prefix gen_prefix in_suffix gen_suffix" | tr ' ' '\t' > GBS_Y_QC.tab
 echo "ID Sequence" | tr ' ' '\t' > GBS_Y_seq.tab
 seq=$(head -n2 $HOME/Horse_parentage_SNPs/eMSY/eMSYv3_nontrimmed.fasta | tail -n1 | tr 'acgt' 'ACGT')
-#seqRC=$(echo $seq | rev | tr 'ACGT' 'TGCA')
 tail -n+2 GBS_Y.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/' | tr ',' '\t' | while read id chr pos ref strand pref alleles suff;do
   tpos=$((pos-1))
   prefLen=${#pref}
@@ -2006,14 +2005,14 @@ tail -n+2 GBS_Y.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\],/'
     tpref=${seq:$start:$prefLen}
     tsuff=${seq:$pos:$suffLen}
     #tref=${seq:$tpos:1}
-    fpref=${seq:$start:100}
+    fpref=${seq:$fstart:100}
     fsuff=${seq:$pos:100}
   else
     tpref=$(echo ${seq:$pos:$((suffLen-1))} | rev | tr 'ACGT' 'TGCA')
     tsuff=$(echo ${seq:$((start-1)):$((prefLen+1))} | rev | tr 'ACGT' 'TGCA')
     #tref=$(echo ${seq:$tpos:1} | tr 'ACGT' 'TGCA')
     fpref=$(echo ${seq:$pos:100} | rev | tr 'ACGT' 'TGCA')
-    fsuff=$(echo ${seq:$start:100} | rev | tr 'ACGT' 'TGCA')
+    fsuff=$(echo ${seq:$fstart:100} | rev | tr 'ACGT' 'TGCA')
   fi
   if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> Y_flank_errors.tab;fi
   echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> GBS_Y_QC.tab
@@ -2047,7 +2046,7 @@ tail -n+2 GBS_nonY.csv | cut -d, -f1,2,3,5,7,10 | sed 's/\[/,\[/' | sed 's/\]/\]
   if [[ "$ref" != "$tref" || "$pref" != "$tpref" || "$suff" != "$tsuff" ]];then echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> nonY_flank_errors.tab;fi
   echo $id $ref $tref $pref $tpref $suff $tsuff | tr ' ' '\t' >> GBS_nonY_QC.tab
   fstart=$((tpos-100))
-  fpref=$(echo ${seq:$start:100} | tr 'acgt' 'ACGT')
+  fpref=$(echo ${seq:$fstart:100} | tr 'acgt' 'ACGT')
   fsuff=$(echo ${seq:$pos:100} | tr 'acgt' 'ACGT')
   echo $id $fpref$alleles$fsuff | tr ' ' '\t' >> GBS_nonY_seq.tab
 done
